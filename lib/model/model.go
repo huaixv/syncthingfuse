@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/burkemw3/syncthingfuse/lib/config"
-	"github.com/burkemw3/syncthingfuse/lib/fileblockcache"
-	"github.com/burkemw3/syncthingfuse/lib/filetreecache"
+	"github.com/cre4ture/syncthingfuse/lib/config"
+	"github.com/cre4ture/syncthingfuse/lib/fileblockcache"
+	"github.com/cre4ture/syncthingfuse/lib/filetreecache"
 	"github.com/cznic/mathutil"
 	human "github.com/dustin/go-humanize"
 	"github.com/syncthing/syncthing/lib/connections"

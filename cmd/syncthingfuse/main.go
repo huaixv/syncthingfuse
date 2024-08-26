@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/burkemw3/syncthingfuse/lib/config"
-	"github.com/burkemw3/syncthingfuse/lib/model"
 	"github.com/calmh/logger"
+	"github.com/cre4ture/syncthingfuse/lib/config"
+	"github.com/cre4ture/syncthingfuse/lib/model"
 	"github.com/syncthing/syncthing/lib/connections"
 	"github.com/syncthing/syncthing/lib/discover"
 	"github.com/syncthing/syncthing/lib/osutil"

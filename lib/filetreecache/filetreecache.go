@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/boltdb/bolt"
-	"github.com/burkemw3/syncthingfuse/lib/config"
+	"github.com/cre4ture/syncthingfuse/lib/config"
 	"github.com/syncthing/syncthing/lib/protocol"
 )
 

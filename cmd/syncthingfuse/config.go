@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/burkemw3/syncthingfuse/lib/config"
+	"github.com/cre4ture/syncthingfuse/lib/config"
 	"github.com/syncthing/syncthing/lib/osutil"
 )
 
