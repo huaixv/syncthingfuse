@@ -32,8 +32,8 @@ func MountFuse(mountpoint string, m *model.Model, mainSvc suture.Service) {
 		mountpoint,
 		fuse.FSName("syncthingfuse"),
 		fuse.Subtype("syncthingfuse"),
-		fuse.LocalVolume(),
-		fuse.VolumeName("Syncthing FUSE"),
+		//fuse.LocalVolume(),
+		//fuse.VolumeName("Syncthing FUSE"),
 	)
 	if err != nil {
 		l.Warnln(err)
@@ -52,10 +52,10 @@ func MountFuse(mountpoint string, m *model.Model, mainSvc suture.Service) {
 		l.Infoln("conn.Serve returned", err)
 
 		// check if the mount process has an error to report
-		<-c.Ready
-		if err := c.MountError; err != nil {
-			l.Warnln("conn.MountError:", err)
-		}
+		//<-c.Ready
+		//if err := c.MountError; err != nil {
+		//	l.Warnln("conn.MountError:", err)
+		//}
 	case sig := <-sigc:
 		l.Infoln("Signal", sig, "received, shutting down.")
 	}
