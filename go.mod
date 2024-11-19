@@ -1,4 +1,4 @@
-module github.com/cre4ture/syncthingfuse
+module github.com/huaixv/syncthingfuse
 
 go 1.22.5
 

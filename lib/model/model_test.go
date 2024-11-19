@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/boltdb/bolt"
-	"github.com/cre4ture/syncthingfuse/lib/config"
+	"github.com/huaixv/syncthingfuse/lib/config"
 	stconfig "github.com/syncthing/syncthing/lib/config"
 	"github.com/syncthing/syncthing/lib/protocol"
 )

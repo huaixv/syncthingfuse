@@ -11,8 +11,8 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/calmh/logger"
-	"github.com/cre4ture/syncthingfuse/lib/config"
-	"github.com/cre4ture/syncthingfuse/lib/model"
+	"github.com/huaixv/syncthingfuse/lib/config"
+	"github.com/huaixv/syncthingfuse/lib/model"
 	"github.com/syncthing/syncthing/lib/connections"
 	"github.com/syncthing/syncthing/lib/discover"
 	"github.com/syncthing/syncthing/lib/osutil"

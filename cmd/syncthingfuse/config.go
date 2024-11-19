@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/cre4ture/syncthingfuse/lib/config"
+	"github.com/huaixv/syncthingfuse/lib/config"
 	"github.com/syncthing/syncthing/lib/osutil"
 )
 
