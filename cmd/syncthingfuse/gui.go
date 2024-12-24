@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -22,7 +23,6 @@ import (
 	"github.com/syncthing/syncthing/lib/protocol"
 	"github.com/syncthing/syncthing/lib/sync"
 	"github.com/syncthing/syncthing/lib/tlsutil"
-	"golang.org/x/net/context"
 )
 
 var (
