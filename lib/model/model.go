@@ -244,6 +244,15 @@ func (m *Model) AddConnection(conn connections.Connection, hello protocol.HelloR
 	conn.ClusterConfig(cm)
 }
 
+// Connection returns the current connection for device, and a boolean whether a connection was found.
+func (m *Model) Connection(deviceID protocol.DeviceID) (connections.Connection, bool) {
+	l.Warnf("")
+	m.pmut.RLock()
+	cn, ok := m.protoConn[deviceID]
+	m.pmut.RUnlock()
+	return cn, ok
+}
+
 func (m *Model) ConnectedTo(deviceID protocol.DeviceID) bool {
 	m.pmut.RLock()
 	_, ok := m.protoConn[deviceID]
@@ -734,8 +743,8 @@ func (m *Model) updateIndex(deviceID protocol.DeviceID, folder string, files []p
 }
 
 // A request was made by the peer device
-func (m *Model) Request(deviceID protocol.DeviceID, folder string, name string, offset int64, hash []byte, fromTemporary bool, buf []byte) error {
-	return protocol.ErrNoSuchFile
+func (m *Model) Request(deviceID protocol.DeviceID, folder, name string, size int32, offset int64, hash []byte, weakHash uint32, fromTemporary bool) (out protocol.RequestResponse, err error) {
+	return nil, protocol.ErrNoSuchFile
 }
 
 // A cluster configuration message was received

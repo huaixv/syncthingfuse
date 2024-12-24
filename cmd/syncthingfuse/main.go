@@ -15,7 +15,6 @@ import (
 	"github.com/huaixv/syncthingfuse/lib/model"
 	"github.com/syncthing/syncthing/lib/connections"
 	"github.com/syncthing/syncthing/lib/discover"
-	"github.com/syncthing/syncthing/lib/osutil"
 	"github.com/syncthing/syncthing/lib/protocol"
 	"github.com/thejerf/suture"
 )
@@ -54,13 +53,6 @@ The default configuration directory is:
   %s
 
 `
-)
-
-// The discovery results are sorted by their source priority.
-const (
-	ipv6LocalDiscoveryPriority = iota
-	ipv4LocalDiscoveryPriority
-	globalDiscoveryPriority
 )
 
 func main() {
@@ -127,14 +119,12 @@ func main() {
 
 	m = model.NewModel(cfg, database)
 
-	lans, _ := osutil.GetLans()
-
 	// Start discovery
 	cachedDiscovery := discover.NewCachingMux()
 	mainSvc.Add(cachedDiscovery)
 
 	// Start connection management
-	connectionsService := connections.NewService(cfg.AsStCfg(myID), myID, m, tlsCfg, cachedDiscovery, bepProtocolName, tlsDefaultCommonName, lans)
+	connectionsService := connections.NewService(cfg.AsStCfg(myID), myID, m, tlsCfg, cachedDiscovery, bepProtocolName, tlsDefaultCommonName)
 	mainSvc.Add(connectionsService)
 
 	if cfg.Raw().Options.GlobalAnnounceEnabled {
@@ -149,7 +139,7 @@ func main() {
 			// Each global discovery server gets its results cached for five
 			// minutes, and is not asked again for a minute when it's returned
 			// unsuccessfully.
-			cachedDiscovery.Add(gd, 5*time.Minute, time.Minute, globalDiscoveryPriority)
+			cachedDiscovery.Add(gd, 5*time.Minute, time.Minute)
 		}
 	}
 
@@ -159,14 +149,14 @@ func main() {
 		if err != nil {
 			l.Warnln("IPv4 local discovery:", err)
 		} else {
-			cachedDiscovery.Add(bcd, 0, 0, ipv4LocalDiscoveryPriority)
+			cachedDiscovery.Add(bcd, 0, 0)
 		}
 		// v6 multicasts
 		mcd, err := discover.NewLocal(myID, cfg.Raw().Options.LocalAnnounceMCAddr, connectionsService)
 		if err != nil {
 			l.Warnln("IPv6 local discovery:", err)
 		} else {
-			cachedDiscovery.Add(mcd, 0, 0, ipv6LocalDiscoveryPriority)
+			cachedDiscovery.Add(mcd, 0, 0)
 		}
 	}
 
