@@ -22,6 +22,7 @@ import (
 	"github.com/huaixv/syncthingfuse/lib/fileblockcache"
 	"github.com/huaixv/syncthingfuse/lib/filetreecache"
 	"github.com/syncthing/syncthing/lib/protocol"
+	"github.com/syncthing/syncthing/lib/stats"
 	stsync "github.com/syncthing/syncthing/lib/sync"
 )
 
@@ -162,6 +163,10 @@ func (m *Model) removeUnconfiguredFolders() {
 
 		return nil
 	})
+}
+
+func (m *Model) DeviceStatistics() (map[protocol.DeviceID]stats.DeviceStatistics, error) {
+	return nil, nil
 }
 
 // OnHello is called when an device connects to us.
@@ -614,7 +619,9 @@ func (m *Model) isFilePinned(folder string, filename string) bool {
 }
 
 // An index was received from the peer device
-func (m *Model) Index(deviceID protocol.DeviceID, folder string, files []protocol.FileInfo) {
+func (m *Model) Index(conn protocol.Connection, idx *protocol.Index) error {
+	deviceID := conn.DeviceID()
+	folder := idx.Folder
 	if debug {
 		l.Debugln("model: receiving index from device", deviceID.String()[:5], "for folder", folder)
 	}
@@ -628,14 +635,18 @@ func (m *Model) Index(deviceID protocol.DeviceID, folder string, files []protoco
 		if debug {
 			l.Debugln("model:", deviceID.String()[:5], "not shared with folder", folder, "so ignoring")
 		}
-		return
+		return nil
 	}
 
-	m.updateIndex(deviceID, folder, files)
+	m.updateIndex(deviceID, folder, idx.Files)
+	return nil
 }
 
 // An index update was received from the peer device
-func (m *Model) IndexUpdate(deviceID protocol.DeviceID, folder string, files []protocol.FileInfo) {
+func (m *Model) IndexUpdate(conn protocol.Connection, idx *protocol.IndexUpdate) error {
+	deviceID := conn.DeviceID()
+	folder := idx.Folder
+	files := idx.Files
 	if debug {
 		l.Debugln("model: receiving index update from device", deviceID.String()[:5], "for folder", folder)
 	}
@@ -649,10 +660,11 @@ func (m *Model) IndexUpdate(deviceID protocol.DeviceID, folder string, files []p
 		if debug {
 			l.Debugln("model:", deviceID.String()[:5], "not shared with folder", folder, "so ignoring")
 		}
-		return
+		return nil
 	}
 
 	m.updateIndex(deviceID, folder, files)
+	return nil
 }
 
 // requires write locks on fmut and lmut before entry
@@ -746,19 +758,21 @@ func (m *Model) updateIndex(deviceID protocol.DeviceID, folder string, files []p
 }
 
 // A request was made by the peer device
-func (m *Model) Request(deviceID protocol.DeviceID, folder, name string, size int32, offset int64, hash []byte, weakHash uint32, fromTemporary bool) (out protocol.RequestResponse, err error) {
+func (m *Model) Request(conn protocol.Connection, req *protocol.Request) (out protocol.RequestResponse, err error) {
 	return nil, protocol.ErrNoSuchFile
 }
 
 // A cluster configuration message was received
-func (m *Model) ClusterConfig(deviceID protocol.DeviceID, config protocol.ClusterConfig) {
+func (m *Model) ClusterConfig(conn protocol.Connection, config *protocol.ClusterConfig) error {
 	if debug {
-		l.Debugln("model: receiving cluster config from device", deviceID.String()[:5])
+		l.Debugln("model: receiving cluster config from device", conn.DeviceID().String()[:5])
 	}
+	return nil
 }
 
-func (m *Model) DownloadProgress(device protocol.DeviceID, folder string, updates []protocol.FileDownloadProgressUpdate) {
+func (m *Model) DownloadProgress(conn protocol.Connection, progress *protocol.DownloadProgress) error {
 	// no-op for us!
+	return nil
 }
 
 // The peer device closed the connection

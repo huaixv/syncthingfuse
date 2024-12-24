@@ -60,8 +60,6 @@ func MountFuse(mountpoint string, m *model.Model, mainSvc suture.Service) {
 		l.Infoln("Signal", sig, "received, shutting down.")
 	}
 
-	mainSvc.Stop()
-
 	l.Infoln("Unmounting...")
 	err = Unmount(mountpoint)
 	if err == nil {

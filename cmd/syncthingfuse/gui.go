@@ -22,6 +22,7 @@ import (
 	"github.com/syncthing/syncthing/lib/protocol"
 	"github.com/syncthing/syncthing/lib/sync"
 	"github.com/syncthing/syncthing/lib/tlsutil"
+	"golang.org/x/net/context"
 )
 
 var (
@@ -131,7 +132,7 @@ func (s *apiSvc) getMux() *http.ServeMux {
 	return mux
 }
 
-func (s *apiSvc) Serve() {
+func (s *apiSvc) Serve(ctx context.Context) error {
 	s.stop = make(chan struct{})
 
 	srv := http.Server{
@@ -150,6 +151,7 @@ func (s *apiSvc) Serve() {
 	case <-time.After(time.Second):
 		l.Warnln("API:", err)
 	}
+	return nil
 }
 
 func getMethodHandler(get, post http.Handler) http.Handler {

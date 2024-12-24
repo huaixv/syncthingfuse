@@ -7,16 +7,18 @@ import (
 	"net"
 	"os"
 	"path"
-	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/calmh/logger"
 	"github.com/huaixv/syncthingfuse/lib/config"
 	"github.com/huaixv/syncthingfuse/lib/model"
 	"github.com/syncthing/syncthing/lib/connections"
+	"github.com/syncthing/syncthing/lib/connections/registry"
 	"github.com/syncthing/syncthing/lib/discover"
+	"github.com/syncthing/syncthing/lib/events"
 	"github.com/syncthing/syncthing/lib/protocol"
 	"github.com/thejerf/suture/v4"
+	"golang.org/x/net/context"
 )
 
 var (
@@ -108,55 +110,53 @@ func main() {
 		}
 	}
 
-	mainSvc := suture.New("main", suture.Spec{
-		Log: func(line string) {
-			l.Debugln(line)
-		},
-	})
-	mainSvc.ServeBackground()
+	evLogger := events.NewLogger()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	mainSvc := suture.New("main", suture.Spec{})
+	mainSvc.ServeBackground(ctx)
 
 	database := openDatabase(cfg)
 
+	keyGen := protocol.NewKeyGenerator()
 	m = model.NewModel(cfg, database)
 
-	// Start discovery
-	cachedDiscovery := discover.NewCachingMux()
-	mainSvc.Add(cachedDiscovery)
+	stCfg := cfg.AsStCfg(myID)
 
-	// Start connection management
-	connectionsService := connections.NewService(cfg.AsStCfg(myID), myID, m, tlsCfg, cachedDiscovery, bepProtocolName, tlsDefaultCommonName)
+	// Start discovery and connection management
+	addrLister := &lateAddressLister{}
+
+	connRegistry := registry.New()
+	discoveryManager := discover.NewManager(myID, stCfg, cert, evLogger, addrLister, connRegistry)
+	connectionsService := connections.NewService(stCfg, myID, m, tlsCfg, discoveryManager, bepProtocolName, tlsDefaultCommonName, evLogger, connRegistry, keyGen)
+
+	addrLister.AddressLister = connectionsService
+
+	mainSvc.Add(discoveryManager)
 	mainSvc.Add(connectionsService)
 
 	if cfg.Raw().Options.GlobalAnnounceEnabled {
 		for _, srv := range cfg.Raw().Options.GlobalAnnounceServers {
 			l.Infoln("Using discovery server", srv)
-			gd, err := discover.NewGlobal(srv, cert, connectionsService)
+			_, err := discover.NewGlobal(srv, cert, addrLister, evLogger, connRegistry)
 			if err != nil {
 				l.Warnln("Global discovery:", err)
-				continue
 			}
-
-			// Each global discovery server gets its results cached for five
-			// minutes, and is not asked again for a minute when it's returned
-			// unsuccessfully.
-			cachedDiscovery.Add(gd, 5*time.Minute, time.Minute)
 		}
 	}
 
 	if cfg.Raw().Options.LocalAnnounceEnabled {
 		// v4 broadcasts
-		bcd, err := discover.NewLocal(myID, fmt.Sprintf(":%d", cfg.Raw().Options.LocalAnnouncePort), connectionsService)
+		_, err := discover.NewLocal(myID, fmt.Sprintf(":%d", cfg.Raw().Options.LocalAnnouncePort), connectionsService, evLogger)
 		if err != nil {
 			l.Warnln("IPv4 local discovery:", err)
-		} else {
-			cachedDiscovery.Add(bcd, 0, 0)
 		}
 		// v6 multicasts
-		mcd, err := discover.NewLocal(myID, cfg.Raw().Options.LocalAnnounceMCAddr, connectionsService)
-		if err != nil {
+		_, err1 := discover.NewLocal(myID, cfg.Raw().Options.LocalAnnounceMCAddr, connectionsService, evLogger)
+		if err1 != nil {
 			l.Warnln("IPv6 local discovery:", err)
-		} else {
-			cachedDiscovery.Add(mcd, 0, 0)
 		}
 	}
 
@@ -181,4 +181,8 @@ func openDatabase(cfg *config.Wrapper) *bolt.DB {
 	databasePath := path.Join(path.Dir(cfg.ConfigPath()), "boltdb")
 	database, _ := bolt.Open(databasePath, 0600, nil) // TODO check error
 	return database
+}
+
+type lateAddressLister struct {
+	discover.AddressLister
 }
