@@ -320,9 +320,10 @@ func (m *Model) GetFileData(folder string, filepath string, readStart int64, rea
 	m.pmut.RLock()
 	defer m.pmut.RUnlock()
 
+	blockSize := protocol.BlockSize(entry.Size)
 	// create workers for pulling
 	for i, block := range entry.Blocks {
-		blockStart := int64(i * protocol.BlockSize)
+		blockStart := int64(i * blockSize)
 		blockEnd := blockStart + int64(block.Size)
 
 		if blockEnd > readStart {
@@ -338,14 +339,14 @@ func (m *Model) GetFileData(folder string, filepath string, readStart int64, rea
 						blockStart:      blockStart,
 						readEnd:         readEnd,
 						blockEnd:        blockEnd,
-						blockPullStatus: m.getOrCreatePullStatus("Fetch", folder, filepath, block, blockStart, assigned),
+						blockPullStatus: m.getOrCreatePullStatus("Fetch", folder, filepath, block, int64(blockSize), blockStart, assigned),
 					}
 					pendingBlocks = append(pendingBlocks, pendingBlock)
 				}
-			} else if blockStart < readEnd+protocol.BlockSize {
+			} else if blockStart < readEnd+int64(blockSize) {
 				if false == fbc.HasCachedBlockData(block.Hash) && false == fbc.HasPinnedBlock(block.Hash) {
 					// prefetch this block
-					m.getOrCreatePullStatus("Prefetch", folder, filepath, block, blockStart, assigned)
+					m.getOrCreatePullStatus("Prefetch", folder, filepath, block, int64(blockSize), blockStart, assigned)
 				}
 			}
 		}
@@ -404,20 +405,21 @@ const (
 )
 
 type blockPullStatus struct {
-	comment string
-	folder  string
-	file    string
-	block   protocol.BlockInfo
-	offset  int64
-	state   blockPullState
-	data    []byte
-	error   error
-	mutex   *sync.RWMutex
-	cv      *sync.Cond // protects this data structure. cannot be acquired before any global locks (e.g. fmut)
+	comment   string
+	folder    string
+	file      string
+	block     protocol.BlockInfo
+	blockSize int64
+	offset    int64
+	state     blockPullState
+	data      []byte
+	error     error
+	mutex     *sync.RWMutex
+	cv        *sync.Cond // protects this data structure. cannot be acquired before any global locks (e.g. fmut)
 }
 
 // requires fmut write lock and pmut read lock (or better) before entry
-func (m *Model) getOrCreatePullStatus(comment string, folder string, file string, block protocol.BlockInfo, offset int64, state blockPullState) *blockPullStatus {
+func (m *Model) getOrCreatePullStatus(comment string, folder string, file string, block protocol.BlockInfo, blockSize, offset int64, state blockPullState) *blockPullStatus {
 	hash := b64.URLEncoding.EncodeToString(block.Hash)
 
 	pullStatus, ok := m.pulls[folder][hash]
@@ -427,14 +429,15 @@ func (m *Model) getOrCreatePullStatus(comment string, folder string, file string
 
 	var mutex sync.RWMutex
 	pullStatus = &blockPullStatus{
-		comment: comment,
-		folder:  folder,
-		file:    file,
-		block:   block,
-		offset:  offset,
-		state:   state,
-		mutex:   &mutex,
-		cv:      sync.NewCond(&mutex),
+		comment:   comment,
+		folder:    folder,
+		file:      file,
+		block:     block,
+		blockSize: blockSize,
+		offset:    offset,
+		state:     state,
+		mutex:     &mutex,
+		cv:        sync.NewCond(&mutex),
 	}
 
 	m.pulls[folder][hash] = pullStatus
@@ -489,8 +492,9 @@ func (m *Model) isBlockStillNeeded(status *blockPullStatus) bool {
 		return false
 	}
 
+	blockSize := protocol.BlockSize(entry.Size)
 	for i, block := range entry.Blocks {
-		blockStart := int64(i * protocol.BlockSize)
+		blockStart := int64(i * blockSize)
 		if blockStart == status.offset && bytes.Equal(block.Hash, status.block.Hash) {
 			return true
 		}
@@ -529,7 +533,7 @@ func (m *Model) pullBlock(status *blockPullStatus, addToCache bool) {
 				l.Debugln("Trying to fetch block at offset", status.offset, "for", status.folder, status.file, "from device", conn.ID().String()[:5])
 			}
 
-			requestedData, requestError = conn.Request(status.folder, status.file, status.offset, int(status.block.Size), status.block.Hash, false)
+			requestedData, requestError = conn.Request(status.folder, status.file, status.offset, int(status.block.Size), status.block.Hash, 0, false)
 			if requestError == nil {
 				// check hash
 				actualHash := sha256.Sum256(requestedData)
@@ -714,10 +718,11 @@ func (m *Model) updateIndex(deviceID protocol.DeviceID, folder string, files []p
 
 			// trigger pull on unsatisfied blocks for pinned files
 			if m.isFilePinned(folder, file.Name) {
+				blockSize := file.BlockSize()
 				for i, block := range file.Blocks {
 					if false == fbc.HasPinnedBlock(block.Hash) {
-						blockStart := int64(i * protocol.BlockSize)
-						status := m.getOrCreatePullStatus("Pin fetch", folder, file.Name, block, blockStart, queued)
+						blockStart := int64(i * blockSize)
+						status := m.getOrCreatePullStatus("Pin fetch", folder, file.Name, block, int64(blockSize), blockStart, queued)
 						m.pinnedList.PushBack(status)
 					}
 				}
