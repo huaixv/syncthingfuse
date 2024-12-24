@@ -74,6 +74,7 @@ func main() {
 
 	// Ensure that our home directory exists.
 	ensureDir(baseDirs["config"], 0700)
+	ensureDir(baseDirs["cache"], 0700)
 
 	// Ensure that that we have a certificate and key.
 	tlsCfg, cert := getTlsConfig()
@@ -178,7 +179,7 @@ func main() {
 }
 
 func openDatabase(cfg *config.Wrapper) *bolt.DB {
-	databasePath := path.Join(path.Dir(cfg.ConfigPath()), "boltdb")
+	databasePath := path.Join(cfg.CachePath(), "boltdb")
 	database, _ := bolt.Open(databasePath, 0600, nil) // TODO check error
 	return database
 }

@@ -264,7 +264,7 @@ func setup(deviceID protocol.DeviceID, dir string, peers ...protocol.DeviceID) (
 	realCfg := config.New(deviceID, deviceID.String()[:5])
 	cfg := config.Wrap(configFile.Name(), realCfg)
 
-	databasePath := path.Join(path.Dir(cfg.ConfigPath()), "boltdb")
+	databasePath := path.Join(cfg.CachePath(), "boltdb")
 	database, _ := bolt.Open(databasePath, 0600, nil)
 
 	folder := "syncthingfusetest"

@@ -26,11 +26,13 @@ const (
 	locAuditLog                   = "auditLog"
 	locGUIAssets                  = "GUIAssets"
 	locDefFolder                  = "defFolder"
+	locCacheDir                   = "cacheDir"
 )
 
 // Platform dependent directories
 var baseDirs = map[string]string{
 	"config": defaultConfigDir(), // Overridden by -home flag
+	"cache":  defaultCacheDir(),  // Overridden by -cache flag
 	"home":   homeDir(),          // User's home directory, *not* -home flag
 }
 
@@ -48,6 +50,7 @@ var locations = map[locationEnum]string{
 	locAuditLog:      "${config}/audit-${timestamp}.log",
 	locGUIAssets:     "${config}/gui",
 	locDefFolder:     "${home}/Sync",
+	locCacheDir:      "${cache}",
 }
 
 // expandLocations replaces the variables in the location map with actual
@@ -90,6 +93,25 @@ func defaultConfigDir() string {
 
 	default:
 		l.Fatalln("Only OS X and Linux supported right now!")
+	}
+
+	return "nil"
+}
+
+func defaultCacheDir() string {
+	switch runtime.GOOS {
+	case "linux":
+		if xdgCfg := os.Getenv("XDG_CACHE_HOME"); xdgCfg != "" {
+			return filepath.Join(xdgCfg, "syncthing")
+		}
+		dir, err := fs.ExpandTilde("~/.cache/syncthingfuse")
+		if err != nil {
+			l.Fatalln(err)
+		}
+		return dir
+
+	default:
+		l.Fatalln("Only Linux supported right now!")
 	}
 
 	return "nil"

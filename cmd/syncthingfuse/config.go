@@ -10,13 +10,14 @@ import (
 
 func getConfiguration() *config.Wrapper {
 	cfgFile := locations[locConfigFile]
+	cacheDir := locations[locCacheDir]
 
 	// Load the configuration file, if it exists. If it does not, create a template.
 	if info, err := os.Stat(cfgFile); err == nil {
 		if !info.Mode().IsRegular() {
 			l.Fatalln("Config file is not a file?")
 		}
-		cfg, err = config.Load(cfgFile, myID)
+		cfg, err = config.Load(cfgFile, cacheDir, myID)
 		if err != nil {
 			l.Fatalln("Configuration:", err)
 		}
@@ -24,7 +25,7 @@ func getConfiguration() *config.Wrapper {
 		l.Infoln("No config file; starting with empty defaults")
 		myName, _ := os.Hostname()
 		newCfg := defaultConfig(myName)
-		cfg = config.Wrap(cfgFile, newCfg)
+		cfg = config.Wrap(cfgFile, cacheDir, newCfg)
 		cfg.Save()
 		l.Infof("Edit %s to taste or use the GUI\n", cfgFile)
 	}

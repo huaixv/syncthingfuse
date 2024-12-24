@@ -10,26 +10,28 @@ import (
 )
 
 type Wrapper struct {
-	cfg  Configuration
-	path string
-	mut  sync.Mutex
+	cfg      Configuration
+	cfgPath  string
+	cacheDir string
+	mut      sync.Mutex
 }
 
 // Wrap wraps an existing Configuration structure and ties it to a file on
 // disk.
-func Wrap(path string, cfg Configuration) *Wrapper {
+func Wrap(cfgPath string, cacheDir string, cfg Configuration) *Wrapper {
 	w := &Wrapper{
-		cfg:  cfg,
-		path: path,
-		mut:  sync.NewMutex(),
+		cfg:      cfg,
+		cfgPath:  cfgPath,
+		cacheDir: cacheDir,
+		mut:      sync.NewMutex(),
 	}
 	return w
 }
 
 // Load loads an existing file on disk and returns a new configuration
 // wrapper.
-func Load(path string, myID protocol.DeviceID) (*Wrapper, error) {
-	fd, err := os.Open(path)
+func Load(cfgPath string, cacheDir string, myID protocol.DeviceID) (*Wrapper, error) {
+	fd, err := os.Open(cfgPath)
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +42,15 @@ func Load(path string, myID protocol.DeviceID) (*Wrapper, error) {
 		return nil, err
 	}
 
-	return Wrap(path, cfg), nil
+	return Wrap(cfgPath, cacheDir, cfg), nil
 }
 
 func (w *Wrapper) ConfigPath() string {
-	return w.path
+	return w.cfgPath
+}
+
+func (w *Wrapper) CachePath() string {
+	return w.cacheDir
 }
 
 // Raw returns the currently wrapped Configuration object.
@@ -140,7 +146,7 @@ func (w *Wrapper) Replace(to Configuration) error {
 
 // Save writes the configuration to disk
 func (w *Wrapper) Save() error {
-	fd, err := osutil.CreateAtomic(w.path)
+	fd, err := osutil.CreateAtomic(w.cfgPath)
 	if err != nil {
 		return err
 	}

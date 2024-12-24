@@ -17,7 +17,7 @@ var (
 
 func TestGetSetGet(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "1b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	hash := []byte("teh hash")
@@ -36,7 +36,7 @@ func TestGetSetGet(t *testing.T) {
 
 func TestBlockGetsEvicted1(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -61,7 +61,7 @@ func TestBlockGetsEvicted1(t *testing.T) {
 
 func TestBlockGetsEvicted1AfterRestart(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -88,7 +88,7 @@ func TestBlockGetsEvicted1AfterRestart(t *testing.T) {
 
 func TestBlockGetsEvicted2(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -113,7 +113,7 @@ func TestBlockGetsEvicted2(t *testing.T) {
 
 func TestEvictMultipleBlocks(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -138,7 +138,7 @@ func TestEvictMultipleBlocks(t *testing.T) {
 
 func TestTrivialPin(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -156,7 +156,7 @@ func TestTrivialPin(t *testing.T) {
 
 func TestPinStays(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -178,7 +178,7 @@ func TestPinStays(t *testing.T) {
 
 func TestPinExistingStays(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -202,7 +202,7 @@ func TestPinExistingStays(t *testing.T) {
 
 func TestPinNewBlockDespiteExistingStays(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -226,7 +226,7 @@ func TestPinNewBlockDespiteExistingStays(t *testing.T) {
 
 func TestPinStaysAfterUnpin(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -248,7 +248,7 @@ func TestPinStaysAfterUnpin(t *testing.T) {
 
 func TestPinLeavesAfterUnpin(t *testing.T) {
 	cfg, db, fldrCfg := setup(t, "2b")
-	defer os.RemoveAll(path.Dir(cfg.ConfigPath()))
+	defer os.RemoveAll(cfg.CachePath())
 	fbc, _ := NewFileBlockCache(cfg, db, fldrCfg)
 
 	data1 := []byte("data1")
@@ -309,7 +309,7 @@ func setup(t *testing.T, cacheSize string) (*config.Wrapper, *bolt.DB, config.Fo
 	realCfg := config.New(deviceID, "local")
 	cfg := config.Wrap(configFile.Name(), realCfg)
 
-	databasePath := path.Join(path.Dir(cfg.ConfigPath()), "boltdb")
+	databasePath := path.Join(cfg.CachePath(), "boltdb")
 	database, _ := bolt.Open(databasePath, 0600, nil)
 
 	folderCfg := config.FolderConfiguration{

@@ -384,12 +384,12 @@ func (d *FileBlockCache) evictForSizeUnsafe(cfb *bolt.Bucket, pbb *bolt.Bucket, 
 }
 
 func GetDiskCacheBasePath(cfg *config.Wrapper, folder string) string {
-	return path.Join(path.Dir(cfg.ConfigPath()), folder)
+	return path.Join(cfg.CachePath(), folder)
 }
 
 func getDiskCachePath(cfg *config.Wrapper, folder string, blockHash []byte) string {
 	blockHashString := b64.URLEncoding.EncodeToString(blockHash)
-	return path.Join(path.Dir(cfg.ConfigPath()), folder, blockHashString)
+	return path.Join(cfg.CachePath(), folder, blockHashString)
 }
 
 func getEntryUnsafely(bucket *bolt.Bucket, blockHash []byte) (fileCacheEntry, bool) {
