@@ -69,8 +69,11 @@ func New(myID protocol.DeviceID, myName string) Configuration {
 	setDefaults(&cfg.Options)
 
 	thisDevice, _ := protocol.DeviceIDFromString(cfg.MyID)
-	thisDeviceCfg := config.NewDeviceConfiguration(thisDevice, myName)
-	thisDeviceCfg.Addresses = []string{"dynamic"}
+	thisDeviceCfg := config.DeviceConfiguration{
+		DeviceID:  thisDevice,
+		Name:      myName,
+		Addresses: []string{"dynamic"},
+	}
 	cfg.Folders = []FolderConfiguration{}
 	cfg.Devices = []config.DeviceConfiguration{thisDeviceCfg}
 
