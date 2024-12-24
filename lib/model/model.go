@@ -46,7 +46,7 @@ type Model struct {
 	ctx context.Context
 }
 
-func NewModel(cfg *config.Wrapper, db *bolt.DB) *Model {
+func NewModel(ctx context.Context, cfg *config.Wrapper, db *bolt.DB) *Model {
 	var lmutex sync.Mutex
 	m := &Model{
 		cfg:         cfg,
@@ -63,6 +63,7 @@ func NewModel(cfg *config.Wrapper, db *bolt.DB) *Model {
 
 		protoConn: make(map[protocol.DeviceID]protocol.Connection),
 		pmut:      stsync.NewRWMutex(),
+		ctx:       ctx,
 	}
 
 	for _, folderCfg := range m.cfg.Folders() {

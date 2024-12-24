@@ -121,7 +121,7 @@ func main() {
 	database := openDatabase(cfg)
 
 	keyGen := protocol.NewKeyGenerator()
-	m = model.NewModel(cfg, database)
+	m = model.NewModel(ctx, cfg, database)
 
 	stCfg := cfg.AsStCfg(myID)
 
