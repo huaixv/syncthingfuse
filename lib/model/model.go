@@ -192,7 +192,7 @@ func (m *Model) AddConnection(conn protocol.Connection, hello protocol.Hello) {
 
 	if _, ok := m.protoConn[deviceID]; ok {
 		// TODO syncthing replaces connections, possibly for relays, so we should to that
-		panic("add existing device")
+		delete(m.protoConn, deviceID)
 	}
 	m.protoConn[deviceID] = conn
 
