@@ -17,7 +17,7 @@ import (
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
 	"github.com/huaixv/syncthingfuse/lib/model"
-	"github.com/thejerf/suture"
+	"github.com/thejerf/suture/v4"
 	"golang.org/x/net/context"
 )
 

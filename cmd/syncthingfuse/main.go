@@ -16,7 +16,7 @@ import (
 	"github.com/syncthing/syncthing/lib/connections"
 	"github.com/syncthing/syncthing/lib/discover"
 	"github.com/syncthing/syncthing/lib/protocol"
-	"github.com/thejerf/suture"
+	"github.com/thejerf/suture/v4"
 )
 
 var (

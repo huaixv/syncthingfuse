@@ -9,7 +9,7 @@ require (
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548
 	github.com/dustin/go-humanize v1.0.1
 	github.com/syncthing/syncthing v1.28.1
-	github.com/thejerf/suture v4.0.5+incompatible
+	github.com/thejerf/suture/v4 v4.0.5
 	golang.org/x/net v0.30.0
 )
 
@@ -48,7 +48,6 @@ require (
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/syncthing/notify v0.0.0-20210616190510-c6b7342338d2 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
-	github.com/thejerf/suture/v4 v4.0.5 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
