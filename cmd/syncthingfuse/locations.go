@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/syncthing/syncthing/lib/osutil"
+	"github.com/syncthing/syncthing/lib/fs"
 )
 
 type locationEnum string
@@ -58,7 +58,7 @@ func expandLocations() error {
 			dir = strings.Replace(dir, "${"+varName+"}", value, -1)
 		}
 		var err error
-		dir, err = osutil.ExpandTilde(dir)
+		dir, err = fs.ExpandTilde(dir)
 		if err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func expandLocations() error {
 func defaultConfigDir() string {
 	switch runtime.GOOS {
 	case "darwin":
-		dir, err := osutil.ExpandTilde("~/Library/Application Support/SyncthingFUSE")
+		dir, err := fs.ExpandTilde("~/Library/Application Support/SyncthingFUSE")
 		if err != nil {
 			l.Fatalln(err)
 		}
@@ -82,7 +82,7 @@ func defaultConfigDir() string {
 		if xdgCfg := os.Getenv("XDG_CONFIG_HOME"); xdgCfg != "" {
 			return filepath.Join(xdgCfg, "syncthing")
 		}
-		dir, err := osutil.ExpandTilde("~/.config/syncthingfuse")
+		dir, err := fs.ExpandTilde("~/.config/syncthingfuse")
 		if err != nil {
 			l.Fatalln(err)
 		}
@@ -97,7 +97,7 @@ func defaultConfigDir() string {
 
 // homeDir returns the user's home directory, or dies trying.
 func homeDir() string {
-	home, err := osutil.ExpandTilde("~")
+	home, err := fs.ExpandTilde("~")
 	if err != nil {
 		l.Fatalln(err)
 	}
