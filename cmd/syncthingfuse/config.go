@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/huaixv/syncthingfuse/lib/config"
-	"github.com/syncthing/syncthing/lib/osutil"
 )
 
 func getConfiguration() *config.Wrapper {
@@ -36,7 +35,7 @@ func getConfiguration() *config.Wrapper {
 func ensureDir(dir string, mode int) {
 	fi, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		err := osutil.MkdirAll(dir, 0700)
+		err := os.MkdirAll(dir, 0700)
 		if err != nil {
 			l.Fatalln(err)
 		}
