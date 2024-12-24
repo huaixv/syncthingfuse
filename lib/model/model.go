@@ -15,11 +15,11 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/cznic/mathutil"
+	human "github.com/dustin/go-humanize"
 	"github.com/huaixv/syncthingfuse/lib/config"
 	"github.com/huaixv/syncthingfuse/lib/fileblockcache"
 	"github.com/huaixv/syncthingfuse/lib/filetreecache"
-	"github.com/cznic/mathutil"
-	human "github.com/dustin/go-humanize"
 	"github.com/syncthing/syncthing/lib/connections"
 	"github.com/syncthing/syncthing/lib/protocol"
 	stsync "github.com/syncthing/syncthing/lib/sync"
