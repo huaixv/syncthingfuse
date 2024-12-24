@@ -72,7 +72,7 @@ func (s *apiSvc) getListener() (net.Listener, error) {
 			name = tlsDefaultCommonName
 		}
 
-		cert, err = tlsutil.NewCertificate(locations[locHTTPSCertFile], locations[locHTTPSKeyFile], name, tlsRSABits)
+		cert, err = tlsutil.NewCertificate(locations[locHTTPSCertFile], locations[locHTTPSKeyFile], name)
 	}
 	if err != nil {
 		return nil, err
