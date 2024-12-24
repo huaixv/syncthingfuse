@@ -41,9 +41,9 @@ type GUIConfiguration struct {
 	RawAddress string `xml:"address" json:"address" default:"127.0.0.1:5833"`
 }
 
-func (f FolderConfiguration) GetCacheSizeBytes() (int32, error) {
+func (f FolderConfiguration) GetCacheSizeBytes() (int, error) {
 	bytes, err := human.ParseBytes(f.CacheSize)
-	return int32(bytes), err
+	return int(bytes), err
 }
 
 type OptionsConfiguration struct {

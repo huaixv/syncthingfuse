@@ -19,8 +19,8 @@ type FileBlockCache struct {
 	folder          string
 	folderBucketKey []byte
 
-	maximumBytesStored int32
-	currentBytesStored int32
+	maximumBytesStored int
+	currentBytesStored int
 	mostRecentlyUsed   []byte
 	leastRecentlyUsed  []byte
 }
@@ -34,7 +34,7 @@ type fileCacheEntry struct {
 	Hash     []byte
 	Previous []byte
 	Next     []byte
-	Size     int32
+	Size     int
 }
 
 func NewFileBlockCache(cfg *config.Wrapper, db *bolt.DB, fldrCfg config.FolderConfiguration) (*FileBlockCache, error) {
@@ -332,7 +332,7 @@ func (d *FileBlockCache) AddCachedFileData(block protocol.BlockInfo, data []byte
 	})
 }
 
-func (d *FileBlockCache) addAsMruUnsafe(cfb *bolt.Bucket, hash []byte, size int32) {
+func (d *FileBlockCache) addAsMruUnsafe(cfb *bolt.Bucket, hash []byte, size int) {
 	current := fileCacheEntry{
 		Hash: hash,
 		Next: d.mostRecentlyUsed,
@@ -351,7 +351,7 @@ func (d *FileBlockCache) addAsMruUnsafe(cfb *bolt.Bucket, hash []byte, size int3
 	}
 }
 
-func (d *FileBlockCache) evictForSizeUnsafe(cfb *bolt.Bucket, pbb *bolt.Bucket, blockSize int32) {
+func (d *FileBlockCache) evictForSizeUnsafe(cfb *bolt.Bucket, pbb *bolt.Bucket, blockSize int) {
 	for d.currentBytesStored+blockSize > d.maximumBytesStored && d.leastRecentlyUsed != nil {
 		// evict LRU
 		victim, _ := getEntryUnsafely(cfb, d.leastRecentlyUsed)
