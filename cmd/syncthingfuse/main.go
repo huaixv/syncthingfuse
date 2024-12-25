@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -17,6 +18,7 @@ import (
 	"github.com/syncthing/syncthing/lib/connections/registry"
 	"github.com/syncthing/syncthing/lib/discover"
 	"github.com/syncthing/syncthing/lib/events"
+	stlogger "github.com/syncthing/syncthing/lib/logger"
 	"github.com/syncthing/syncthing/lib/protocol"
 	"github.com/thejerf/suture/v4"
 )
@@ -85,6 +87,8 @@ func main() {
 
 	myID = protocol.NewDeviceID(cert.Certificate[0])
 	l.SetPrefix(fmt.Sprintf("[%s] ", myID.String()[:5]))
+	l.SetFlags(log.Lshortfile | log.LstdFlags)
+	stlogger.DefaultLogger.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	l.Infoln("Started syncthingfuse v.", LongVersion)
 	l.Infoln("My ID:", myID)
