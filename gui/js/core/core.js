@@ -245,6 +245,7 @@ angular.module('syncthingfuse.core').controller('SyncthingFuseController', funct
 
         var folderCfg = $scope.currentFolder;
         folderCfg.devices = [];
+        folderCfg.devices.push({ deviceID: $scope.config.myID });
         $scope.config.devices.forEach(function (d) {
             if (folderCfg.selectedDevices[d.deviceID]) {
                 folderCfg.devices.push({ deviceID: d.deviceID });
